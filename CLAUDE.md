@@ -108,9 +108,9 @@ confirmed → cancelled
 ## Common Commands
 
 ```bash
-# รัน backend server
+# รัน backend server (port 5001 เพราะ macOS AirPlay ใช้ 5000)
 cd backend
-flask --app run run --debug
+flask --app run run --debug --port 5001
 
 # สร้าง migration หลังแก้ไข model
 flask --app run db migrate -m "description"

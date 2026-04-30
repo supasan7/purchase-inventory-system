@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products — Mini ERP</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo">Mini ERP</div>
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-dot" style="background:#7F77DD"></span> Dashboard
+    </a>
+    <a href="products.html" class="nav-item active">
+      <span class="nav-dot" style="background:#1D9E75"></span> Products
+    </a>
+    <a href="suppliers.html" class="nav-item">
+      <span class="nav-dot" style="background:#1D9E75"></span> Suppliers
+    </a>
+    <a href="purchase_orders.html" class="nav-item">
+      <span class="nav-dot" style="background:#BA7517"></span> Purchase Orders
+    </a>
+    <a href="inventory.html" class="nav-item">
+      <span class="nav-dot" style="background:#378ADD"></span> Inventory
+    </a>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="page-title">Products</span>
+      <div class="flex-gap">
+        <button class="btn btn-primary" onclick="openModal()">+ เพิ่มสินค้า</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="section-header">
+        <span class="section-title" id="section-count">สินค้าทั้งหมด</span>
+      </div>
+      <div id="error-msg" class="text-danger" style="margin-bottom:8px;font-size:12px"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ชื่อสินค้า</th>
+              <th>หน่วย</th>
+              <th>ราคา/หน่วย</th>
+              <th>Min Qty</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="product-table-body">
+            <tr><td colspan="5" class="empty-state">กำลังโหลด...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal">
+        <div class="modal-title" id="modal-title">เพิ่มสินค้า</div>
+        <div id="modal-error" class="text-danger" style="margin-bottom:8px;font-size:12px"></div>
+        <div class="form-group">
+          <label class="form-label">ชื่อสินค้า *</label>
+          <input type="text" id="input-name" placeholder="ชื่อสินค้า" />
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">หน่วย</label>
+            <input type="text" id="input-unit" placeholder="pcs" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">ราคา/หน่วย</label>
+            <input type="number" id="input-unit-price" placeholder="0" min="0" step="0.01" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Min Qty</label>
+          <input type="number" id="input-min-qty" placeholder="0" min="0" step="0.01" />
+        </div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closeModal()">ยกเลิก</button>
+          <button class="btn btn-primary" onclick="submitForm()">บันทึก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/products.js"></script>
+  <script>
+    let editingId = null;
+
+    async function loadProducts() {
+      try {
+        const products = await fetchProducts();
+        renderTable(products);
+        document.getElementById('section-count').textContent =
+          `สินค้าทั้งหมด (${products.length} รายการ)`;
+        document.getElementById('error-msg').textContent = '';
+      } catch (err) {
+        document.getElementById('error-msg').textContent = 'โหลดข้อมูลไม่สำเร็จ';
+      }
+    }
+
+    function renderTable(products) {
+      const tbody = document.getElementById('product-table-body');
+      if (!products || products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">ยังไม่มีสินค้า</td></tr>';
+        return;
+      }
+      tbody.innerHTML = products.map(p => `
+        <tr>
+          <td>${p.name}</td>
+          <td>${p.unit}</td>
+          <td>${p.unit_price.toFixed(2)}</td>
+          <td>${p.min_qty.toFixed(2)}</td>
+          <td class="flex-gap">
+            <button class="btn btn-sm" onclick="openModal(${JSON.stringify(p).replace(/"/g, '&quot;')})">แก้ไข</button>
+            <button class="btn btn-sm text-danger" onclick="handleDelete(${p.id})">ลบ</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openModal(product = null) {
+      editingId = product ? product.id : null;
+      document.getElementById('modal-title').textContent = product ? 'แก้ไขสินค้า' : 'เพิ่มสินค้า';
+      document.getElementById('input-name').value = product ? product.name : '';
+      document.getElementById('input-unit').value = product ? product.unit : '';
+      document.getElementById('input-unit-price').value = product ? product.unit_price : '';
+      document.getElementById('input-min-qty').value = product ? product.min_qty : '';
+      document.getElementById('modal-error').textContent = '';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      editingId = null;
+    }
+
+    async function submitForm() {
+      const data = {
+        name: document.getElementById('input-name').value.trim(),
+        unit: document.getElementById('input-unit').value.trim() || 'pcs',
+        unit_price: parseFloat(document.getElementById('input-unit-price').value) || 0,
+        min_qty: parseFloat(document.getElementById('input-min-qty').value) || 0,
+      };
+
+      const result = editingId
+        ? await updateProduct(editingId, data)
+        : await createProduct(data);
+
+      if (!result.success) {
+        document.getElementById('modal-error').textContent = result.message;
+        return;
+      }
+
+      closeModal();
+      loadProducts();
+    }
+
+    async function handleDelete(id) {
+      if (!confirm('ลบสินค้านี้?')) return;
+      const result = await deleteProduct(id);
+      if (!result.success) {
+        document.getElementById('error-msg').textContent = result.message;
+        return;
+      }
+      loadProducts();
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>

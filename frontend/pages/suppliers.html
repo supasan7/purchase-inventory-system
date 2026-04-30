@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suppliers — Mini ERP</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo">Mini ERP</div>
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-dot" style="background:#7F77DD"></span> Dashboard
+    </a>
+    <a href="products.html" class="nav-item">
+      <span class="nav-dot" style="background:#1D9E75"></span> Products
+    </a>
+    <a href="suppliers.html" class="nav-item active">
+      <span class="nav-dot" style="background:#1D9E75"></span> Suppliers
+    </a>
+    <a href="purchase_orders.html" class="nav-item">
+      <span class="nav-dot" style="background:#BA7517"></span> Purchase Orders
+    </a>
+    <a href="inventory.html" class="nav-item">
+      <span class="nav-dot" style="background:#378ADD"></span> Inventory
+    </a>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="page-title">Suppliers</span>
+      <div class="flex-gap">
+        <button class="btn btn-primary" onclick="openModal()">+ เพิ่มซัพพลายเออร์</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="section-header">
+        <span class="section-title" id="section-count">ซัพพลายเออร์ทั้งหมด</span>
+      </div>
+      <div id="error-msg" class="text-danger" style="margin-bottom:8px;font-size:12px"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ชื่อบริษัท</th>
+              <th>เบอร์โทร</th>
+              <th>อีเมล</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="supplier-table-body">
+            <tr><td colspan="4" class="empty-state">ยังไม่มีข้อมูล</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal">
+        <div class="modal-title" id="modal-title">เพิ่มซัพพลายเออร์</div>
+        <div id="modal-error" class="text-danger" style="margin-bottom:8px;font-size:12px"></div>
+        <div class="form-group">
+          <label class="form-label">ชื่อบริษัท *</label>
+          <input type="text" id="input-name" placeholder="ชื่อบริษัท" />
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">เบอร์โทร</label>
+            <input type="text" id="input-phone" placeholder="0xx-xxx-xxxx" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">อีเมล</label>
+            <input type="email" id="input-email" placeholder="email@example.com" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ที่อยู่</label>
+          <input type="text" id="input-address" placeholder="ที่อยู่" />
+        </div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closeModal()">ยกเลิก</button>
+          <button class="btn btn-primary" onclick="submitForm()">บันทึก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let editingId = null;
+    const suppliers = [];
+
+    function renderTable(data) {
+      const tbody = document.getElementById('supplier-table-body');
+      document.getElementById('section-count').textContent =
+        `ซัพพลายเออร์ทั้งหมด (${data.length} รายการ)`;
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">ยังไม่มีซัพพลายเออร์</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(s => `
+        <tr>
+          <td>${s.name}</td>
+          <td>${s.phone || '—'}</td>
+          <td>${s.email || '—'}</td>
+          <td class="flex-gap">
+            <button class="btn btn-sm" onclick="openModal(${JSON.stringify(s).replace(/"/g, '&quot;')})">แก้ไข</button>
+            <button class="btn btn-sm text-danger" onclick="handleDelete(${s.id})">ลบ</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openModal(supplier = null) {
+      editingId = supplier ? supplier.id : null;
+      document.getElementById('modal-title').textContent = supplier ? 'แก้ไขซัพพลายเออร์' : 'เพิ่มซัพพลายเออร์';
+      document.getElementById('input-name').value = supplier ? supplier.name : '';
+      document.getElementById('input-phone').value = supplier ? (supplier.phone || '') : '';
+      document.getElementById('input-email').value = supplier ? (supplier.email || '') : '';
+      document.getElementById('input-address').value = supplier ? (supplier.address || '') : '';
+      document.getElementById('modal-error').textContent = '';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      editingId = null;
+    }
+
+    function submitForm() {
+      document.getElementById('modal-error').textContent = 'API ยังไม่ได้เชื่อมต่อ';
+    }
+
+    function handleDelete(id) {
+      document.getElementById('error-msg').textContent = 'API ยังไม่ได้เชื่อมต่อ';
+    }
+
+    renderTable(suppliers);
+  </script>
+</body>
+</html>

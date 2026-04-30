@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Mini ERP</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo">Mini ERP</div>
+    <a href="dashboard.html" class="nav-item active">
+      <span class="nav-dot" style="background:#7F77DD"></span> Dashboard
+    </a>
+    <a href="products.html" class="nav-item">
+      <span class="nav-dot" style="background:#1D9E75"></span> Products
+    </a>
+    <a href="suppliers.html" class="nav-item">
+      <span class="nav-dot" style="background:#1D9E75"></span> Suppliers
+    </a>
+    <a href="purchase_orders.html" class="nav-item">
+      <span class="nav-dot" style="background:#BA7517"></span> Purchase Orders
+    </a>
+    <a href="inventory.html" class="nav-item">
+      <span class="nav-dot" style="background:#378ADD"></span> Inventory
+    </a>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="page-title">Dashboard</span>
+    </div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">PO ทั้งหมด</div>
+          <div class="kpi-value">—</div>
+          <div class="kpi-sub">รายการ</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">รอรับสินค้า</div>
+          <div class="kpi-value">—</div>
+          <div class="kpi-sub">confirmed</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">ยอดสั่งซื้อรวม</div>
+          <div class="kpi-value">—</div>
+          <div class="kpi-sub">บาท</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">สินค้าใกล้หมด</div>
+          <div class="kpi-value">—</div>
+          <div class="kpi-sub">รายการ</div>
+        </div>
+      </div>
+
+      <div class="alert-warning" id="low-stock-alert" style="display:none">
+        ⚠️ สินค้าใกล้หมด: <span id="low-stock-list"></span>
+      </div>
+
+      <div class="section-header">
+        <span class="section-title">PO ล่าสุด</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>PO #</th>
+              <th>Supplier</th>
+              <th>วันที่สั่ง</th>
+              <th>ยอดรวม</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="5" class="empty-state">ยังไม่มีข้อมูล</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

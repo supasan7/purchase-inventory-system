@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Purchase Orders — Mini ERP</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo">Mini ERP</div>
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-dot" style="background:#7F77DD"></span> Dashboard
+    </a>
+    <a href="products.html" class="nav-item">
+      <span class="nav-dot" style="background:#1D9E75"></span> Products
+    </a>
+    <a href="suppliers.html" class="nav-item">
+      <span class="nav-dot" style="background:#1D9E75"></span> Suppliers
+    </a>
+    <a href="purchase_orders.html" class="nav-item active">
+      <span class="nav-dot" style="background:#BA7517"></span> Purchase Orders
+    </a>
+    <a href="inventory.html" class="nav-item">
+      <span class="nav-dot" style="background:#378ADD"></span> Inventory
+    </a>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="page-title">Purchase Orders</span>
+      <div class="flex-gap">
+        <button class="btn btn-primary">+ สร้าง PO</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="section-header">
+        <div class="flex-gap">
+          <select class="btn" id="status-filter" onchange="filterTable()" style="padding:5px 10px">
+            <option value="">ทุก status</option>
+            <option value="draft">Draft</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="received">Received</option>
+            <option value="done">Done</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>PO #</th>
+              <th>Supplier</th>
+              <th>วันที่สั่ง</th>
+              <th>ยอดรวม</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="po-table-body">
+            <tr><td colspan="6" class="empty-state">ยังไม่มีข้อมูล</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STATUS_BADGE = {
+      draft:     'badge-gray',
+      confirmed: 'badge-amber',
+      received:  'badge-blue',
+      done:      'badge-green',
+      cancelled: 'badge-red',
+    };
+
+    const STATUS_LABEL = {
+      draft: 'Draft', confirmed: 'Confirmed',
+      received: 'Received', done: 'Done', cancelled: 'Cancelled',
+    };
+
+    function actionsFor(po) {
+      const view = `<button class="btn btn-sm">ดู</button>`;
+      if (po.status === 'draft')     return `${view}<button class="btn btn-sm">Confirm</button><button class="btn btn-sm text-danger">ยกเลิก</button>`;
+      if (po.status === 'confirmed') return `${view}<button class="btn btn-sm">รับสินค้า</button><button class="btn btn-sm text-danger">ยกเลิก</button>`;
+      if (po.status === 'received')  return `${view}<button class="btn btn-sm">Done</button>`;
+      return view;
+    }
+
+    function renderTable(data) {
+      const filter = document.getElementById('status-filter').value;
+      const filtered = filter ? data.filter(p => p.status === filter) : data;
+      const tbody = document.getElementById('po-table-body');
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">ยังไม่มีข้อมูล</td></tr>';
+        return;
+      }
+      tbody.innerHTML = filtered.map(po => `
+        <tr>
+          <td>#${po.id}</td>
+          <td>${po.supplier}</td>
+          <td>${po.order_date}</td>
+          <td>${po.total.toFixed(2)}</td>
+          <td><span class="badge ${STATUS_BADGE[po.status]}">${STATUS_LABEL[po.status]}</span></td>
+          <td class="flex-gap">${actionsFor(po)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function filterTable() { renderTable([]); }
+
+    renderTable([]);
+  </script>
+</body>
+</html>

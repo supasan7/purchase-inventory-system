@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory — Mini ERP</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo">Mini ERP</div>
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-dot" style="background:#7F77DD"></span> Dashboard
+    </a>
+    <a href="products.html" class="nav-item">
+      <span class="nav-dot" style="background:#1D9E75"></span> Products
+    </a>
+    <a href="suppliers.html" class="nav-item">
+      <span class="nav-dot" style="background:#1D9E75"></span> Suppliers
+    </a>
+    <a href="purchase_orders.html" class="nav-item">
+      <span class="nav-dot" style="background:#BA7517"></span> Purchase Orders
+    </a>
+    <a href="inventory.html" class="nav-item active">
+      <span class="nav-dot" style="background:#378ADD"></span> Inventory
+    </a>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="page-title">Inventory</span>
+      <div class="flex-gap">
+        <button class="btn" id="low-stock-btn" style="display:none">
+          ⚠️ สินค้าใกล้หมด <span id="low-stock-count">0</span> รายการ
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="section-header">
+        <span class="section-title">สต็อกสินค้า</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>สินค้า</th>
+              <th>หน่วย</th>
+              <th>คงเหลือ</th>
+              <th>Min Qty</th>
+              <th>สถานะ</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inv-table-body">
+            <tr><td colspan="6" class="empty-state">ยังไม่มีข้อมูล</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal ประวัติ stock -->
+    <div class="modal-overlay" id="history-modal">
+      <div class="modal" style="width:520px">
+        <div class="modal-title" id="history-title">ประวัติการเคลื่อนไหว</div>
+        <div class="table-wrap" style="max-height:320px;overflow-y:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>วันที่</th><th>ประเภท</th><th>จำนวน</th><th>หมายเหตุ</th>
+              </tr>
+            </thead>
+            <tbody id="history-body">
+              <tr><td colspan="4" class="empty-state">ไม่มีประวัติ</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closeHistory()">ปิด</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TYPE_BADGE = { in: 'badge-green', out: 'badge-red', adjustment: 'badge-blue' };
+    const TYPE_LABEL = { in: 'รับเข้า', out: 'จ่ายออก', adjustment: 'ปรับปรุง' };
+
+    function renderTable(data) {
+      const tbody = document.getElementById('inv-table-body');
+      const lowItems = data.filter(i => parseFloat(i.on_hand_qty) < parseFloat(i.min_qty));
+      const lowBtn = document.getElementById('low-stock-btn');
+      if (lowItems.length) {
+        document.getElementById('low-stock-count').textContent = lowItems.length;
+        lowBtn.style.display = '';
+      } else {
+        lowBtn.style.display = 'none';
+      }
+
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">ยังไม่มีข้อมูล</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(i => {
+        const isLow = parseFloat(i.on_hand_qty) < parseFloat(i.min_qty);
+        return `<tr>
+          <td>${i.name}</td>
+          <td>${i.unit}</td>
+          <td>${parseFloat(i.on_hand_qty).toFixed(2)}</td>
+          <td>${parseFloat(i.min_qty).toFixed(2)}</td>
+          <td><span class="badge ${isLow ? 'badge-red' : 'badge-green'}">${isLow ? 'ต่ำกว่า min' : 'ปกติ'}</span></td>
+          <td><button class="btn btn-sm" onclick="openHistory('${i.name}')">ประวัติ</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    function openHistory(name) {
+      document.getElementById('history-title').textContent = `ประวัติ: ${name}`;
+      document.getElementById('history-body').innerHTML =
+        '<tr><td colspan="4" class="empty-state">ไม่มีประวัติ (API ยังไม่ได้เชื่อมต่อ)</td></tr>';
+      document.getElementById('history-modal').classList.add('open');
+    }
+
+    function closeHistory() {
+      document.getElementById('history-modal').classList.remove('open');
+    }
+
+    renderTable([]);
+  </script>
+</body>
+</html>
