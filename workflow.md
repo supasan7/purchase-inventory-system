@@ -1,7 +1,6 @@
 # Workflow Documentation
 
-ระบบ Purchase & Inventory Management จำลอง business workflow ของ Odoo ERP
-ประกอบด้วย 5 module หลักที่ทำงานเชื่อมกันผ่าน Core Database
+ระบบ Purchase & Inventory Management
 
 ---
 
