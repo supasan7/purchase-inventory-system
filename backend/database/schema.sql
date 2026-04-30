@@ -1,6 +1,10 @@
 -- ============================================================
--- Purchase & Inventory System — Database Schema
+-- Purchase & Inventory System — Database Schema (Reference)
 -- ============================================================
+-- NOTE: Schema นี้เป็น reference เท่านั้น
+-- ปัจจุบัน database ถูก managed โดย SQLAlchemy + Flask-Migrate
+-- ดู models จริงได้ที่ backend/app/models/
+--
 -- ลำดับการสร้าง table สำคัญมาก เพราะมี foreign key dependencies
 -- products, suppliers → purchase_orders → purchase_order_lines
 --                                       → stock_movements
