@@ -128,8 +128,10 @@ erDiagram
     PRODUCTS ||--o{ PURCHASE_ORDER_LINES : "อยู่ใน"
     PRODUCTS ||--|| INVENTORY : "ติดตามสต็อก"
     PRODUCTS ||--o{ STOCK_MOVEMENTS : "บันทึกการเคลื่อนไหว"
+    PRODUCTS ||--o{ PRODUCT_SUPPLIERS : "ผูกกับ"
 
     SUPPLIERS ||--o{ PURCHASE_ORDERS : "ออก PO ให้"
+    SUPPLIERS ||--o{ PRODUCT_SUPPLIERS : "จำหน่าย"
 
     PURCHASE_ORDERS ||--o{ PURCHASE_ORDER_LINES : "มี"
     PURCHASE_ORDERS ||--o{ STOCK_MOVEMENTS : "trigger"
@@ -148,6 +150,14 @@ erDiagram
         string phone
         string email
         string address
+    }
+
+    PRODUCT_SUPPLIERS {
+        int id PK
+        int product_id FK
+        int supplier_id FK
+        decimal supplier_price
+        int lead_time_days
     }
 
     PURCHASE_ORDERS {
@@ -196,6 +206,13 @@ flowchart LR
         P4[DELETE /products/:id]
     end
 
+    subgraph PS["Product Suppliers"]
+        PS1[GET /products/:id/suppliers]
+        PS2[POST /products/:id/suppliers]
+        PS3[PUT /products/:id/suppliers/:sid]
+        PS4[DELETE /products/:id/suppliers/:sid]
+    end
+
     subgraph Supplier["Supplier Management"]
         S1[GET /suppliers]
         S2[POST /suppliers]
@@ -215,7 +232,8 @@ flowchart LR
         I3[GET /inventory/:id/movements]
     end
 
-    Product --> PO
-    Supplier --> PO
+    Product --> PS
+    Supplier --> PS
+    PS -->|filter products by supplier| PO
     PO -->|receive trigger| Inv
 ```

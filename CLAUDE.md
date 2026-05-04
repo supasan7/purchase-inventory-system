@@ -103,6 +103,15 @@ confirmed → cancelled
 หลังอัปเดต inventory ให้เช็คว่า `on_hand_qty < min_qty`
 ถ้าใช่ให้ flag สินค้านั้นใน response
 
+### Product Filter by Supplier (ตอนสร้าง PO)
+
+เมื่อ user เลือก supplier ในหน้าสร้าง PO ระบบต้อง filter product
+จาก `product_suppliers` ตาม `supplier_id` ที่เลือกเท่านั้น
+
+- ห้ามแสดง product ที่ไม่มีความสัมพันธ์กับ supplier นั้นใน dropdown
+- `lines[].product_id` ต้องอยู่ใน product_suppliers ของ supplier_id ที่ส่งมา
+- validation ต้อง reject ถ้า product ไม่ได้ผูกกับ supplier
+
 ---
 
 ## Common Commands
@@ -124,7 +133,8 @@ flask --app run db downgrade
 
 ## Database
 
-- **6 tables:** products, suppliers, purchase_orders, purchase_order_lines, inventory, stock_movements
+- **7 tables:** products, suppliers, product_suppliers, purchase_orders, purchase_order_lines, inventory, stock_movements
+- `product_suppliers` — junction table เชื่อม products ↔ suppliers (many-to-many) เก็บราคาและ lead time ต่อ supplier
 - `stock_movements` เป็น immutable log ห้ามแก้ไขหลังสร้าง
 - `purchase_order_lines.unit_price` คือ snapshot ราคา ณ วันสั่งซื้อ ไม่ใช่ราคาปัจจุบัน
 - `inventory` เก็บแค่ยอดปัจจุบัน ประวัติทั้งหมดอยู่ใน `stock_movements`

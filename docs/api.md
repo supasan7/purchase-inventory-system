@@ -136,7 +136,117 @@ Response format ทุก endpoint:
 
 ---
 
-## 2. Suppliers
+## 2. Product Suppliers
+
+ความสัมพันธ์ many-to-many ระหว่าง product และ supplier
+เก็บราคาที่ supplier แต่ละรายเสนอสำหรับสินค้านั้น
+
+### GET /products/:id/suppliers
+
+ดึง supplier ทั้งหมดที่ผูกกับ product นี้
+
+**Response**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "supplier_id": 1,
+      "supplier_name": "บริษัท ออฟฟิศมาร์ท จำกัด",
+      "supplier_price": 115.0,
+      "lead_time_days": 3
+    }
+  ]
+}
+```
+
+**Error Cases**
+| Status | Message |
+|--------|---------|
+| 404 | Product not found |
+
+---
+
+### POST /products/:id/suppliers
+
+ผูก supplier เข้ากับ product พร้อมกำหนดราคา
+
+**Request Body**
+
+```json
+{
+  "supplier_id": 1,
+  "supplier_price": 115.0,
+  "lead_time_days": 3
+}
+```
+
+**Validation**
+
+- `supplier_id` — required, must exist
+- `supplier_price` — required, >= 0
+- ห้าม duplicate (product_id + supplier_id คู่เดิม)
+
+**Response** `201 Created`
+
+```json
+{
+  "success": true,
+  "data": {
+    "product_id": 1,
+    "supplier_id": 1,
+    "supplier_price": 115.0,
+    "lead_time_days": 3
+  }
+}
+```
+
+**Error Cases**
+| Status | Message |
+|--------|---------|
+| 404 | Product not found |
+| 404 | Supplier not found |
+| 400 | supplier_id is required |
+| 400 | supplier_price must be >= 0 |
+| 400 | This supplier is already linked to the product |
+
+---
+
+### PUT /products/:id/suppliers/:supplier_id
+
+แก้ไขราคาหรือ lead time ของ supplier สำหรับ product นี้
+
+**Request Body**
+
+```json
+{
+  "supplier_price": 110.0,
+  "lead_time_days": 5
+}
+```
+
+**Error Cases**
+| Status | Message |
+|--------|---------|
+| 404 | Product not found |
+| 404 | Supplier not linked to this product |
+
+---
+
+### DELETE /products/:id/suppliers/:supplier_id
+
+ยกเลิกความสัมพันธ์ระหว่าง product กับ supplier
+
+**Error Cases**
+| Status | Message |
+|--------|---------|
+| 404 | Product not found |
+| 404 | Supplier not linked to this product |
+
+---
+
+## 4. Suppliers
 
 ### GET /suppliers
 
@@ -212,7 +322,7 @@ Response format ทุก endpoint:
 
 ---
 
-## 3. Purchase Orders
+## 5. Purchase Orders
 
 ### GET /purchase/orders
 
@@ -298,8 +408,12 @@ Response format ทุก endpoint:
 
 - `supplier_id` — required, must exist
 - `lines` — required, อย่างน้อย 1 รายการ
+- `lines[].product_id` — ต้องมีอยู่ใน `product_suppliers` ของ supplier ที่เลือก (filter by supplier)
 - `lines[].qty` — required, > 0
 - `lines[].unit_price` — required, >= 0
+
+> **หมายเหตุ:** product ที่ใส่ใน lines ต้องผูกกับ supplier นั้นใน `product_suppliers` แล้วเท่านั้น
+> Frontend ควร GET `/products/:id/suppliers` เพื่อ filter dropdown ก่อนแสดงให้ user เลือก
 
 **Error Cases**
 | Status | Message |
@@ -307,6 +421,7 @@ Response format ทุก endpoint:
 | 400 | supplier_id is required |
 | 404 | Supplier not found |
 | 400 | lines must have at least 1 item |
+| 400 | Product {id} is not linked to this supplier |
 | 400 | qty must be > 0 |
 
 ---
@@ -409,7 +524,7 @@ Response format ทุก endpoint:
 
 ---
 
-## 4. Inventory
+## 6. Inventory
 
 ### GET /inventory
 
@@ -491,7 +606,7 @@ Response format ทุก endpoint:
 
 ---
 
-## 5. Dashboard
+## 7. Dashboard
 
 ### GET /dashboard/summary
 

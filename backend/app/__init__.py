@@ -14,7 +14,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
-    from app.models import product, supplier, purchase_order, purchase_order_line, inventory, stock_movement
+    from app.models import product, supplier, product_supplier, purchase_order, purchase_order_line, inventory, stock_movement
 
     from app.routes.product_routes import product_bp
     app.register_blueprint(product_bp, url_prefix='/api/products')
